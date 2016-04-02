@@ -1,0 +1,6 @@
+[submodule "extern/grpc"]
+	path = extern/grpc
+	url = https://github.com/acoross/grpc
+[submodule "extern/protobuf"]
+	path = extern/protobuf
+	url = https://github.com/acoross/protobuf
