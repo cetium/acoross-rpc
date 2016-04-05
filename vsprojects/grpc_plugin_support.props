@@ -6,7 +6,7 @@
   <ItemDefinitionGroup>
     <Link>
       <AdditionalDependencies>grpc_plugin_support.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(SolutionDir)\..\extern\lib\$(Platform)\$(Configuration)\</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)\..\extern\grpc\vsprojects\$(Configuration)\</AdditionalLibraryDirectories>
     </Link>
     <ClCompile>
       <AdditionalIncludeDirectories>$(SolutionDir)\..\extern\grpc;$(SolutionDir)\..\extern\grpc\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
