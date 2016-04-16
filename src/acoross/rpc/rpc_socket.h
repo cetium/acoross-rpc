@@ -50,4 +50,7 @@ private:
 
 }
 }
+
+#include "rpc_socket.ipp"
+
 #endif

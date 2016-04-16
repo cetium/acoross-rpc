@@ -35,17 +35,9 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\src\acoross\rpc\rpc_service.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\acoross\rpc\rpc_socket.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\acoross\rpc\rpc_stub.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
     <None Include="packages.config" />
+    <None Include="..\..\src\acoross\rpc\rpc_socket.ipp">
+      <Filter>소스 파일</Filter>
+    </None>
   </ItemGroup>
 </Project>

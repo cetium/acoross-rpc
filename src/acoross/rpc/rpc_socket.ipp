@@ -1,10 +1,11 @@
-#include "rpc_socket.h"
+#ifndef ACOROSS_RPC_SOCKET_H_
+#define ACOROSS_RPC_SOCKET_H_
+//#include "rpc_socket.h"
 
 namespace acoross {
 namespace rpc {
 
-
-void RpcSocket::send(std::shared_ptr<RpcPacket> new_msg)
+inline void RpcSocket::send(std::shared_ptr<RpcPacket> new_msg)
 {
 	bool write_in_progress = !write_msgs_.empty();
 	write_msgs_.push_back(new_msg);
@@ -14,7 +15,7 @@ void RpcSocket::send(std::shared_ptr<RpcPacket> new_msg)
 	}
 }
 
-void RpcSocket::do_write()
+inline void RpcSocket::do_write()
 {
 	auto self(shared_from_this());
 	boost::asio::async_write(socket_,
@@ -37,7 +38,7 @@ void RpcSocket::do_write()
 	});
 }
 
-void RpcSocket::do_read_header()
+inline void RpcSocket::do_read_header()
 {
 	auto self(shared_from_this());
 	boost::asio::async_read(socket_,
@@ -55,7 +56,7 @@ void RpcSocket::do_read_header()
 	});
 }
 
-void RpcSocket::do_read_body()
+inline void RpcSocket::do_read_body()
 {
 	auto self(shared_from_this());
 	boost::asio::async_read(socket_,
@@ -75,3 +76,4 @@ void RpcSocket::do_read_body()
 
 }
 }
+#endif //ACOROSS_RPC_SOCKET_H_
