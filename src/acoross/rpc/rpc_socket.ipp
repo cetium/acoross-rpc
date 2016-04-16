@@ -1,5 +1,5 @@
-#ifndef ACOROSS_RPC_SOCKET_H_
-#define ACOROSS_RPC_SOCKET_H_
+#ifndef ACOROSS_RPC_SOCKET_IPP_
+#define ACOROSS_RPC_SOCKET_IPP_
 //#include "rpc_socket.h"
 
 namespace acoross {
@@ -76,4 +76,4 @@ inline void RpcSocket::do_read_body()
 
 }
 }
-#endif //ACOROSS_RPC_SOCKET_H_
+#endif //ACOROSS_RPC_SOCKET_IPP_
