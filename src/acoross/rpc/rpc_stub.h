@@ -6,6 +6,7 @@
 #include <unordered_map>
 #include <functional>
 #include <atomic>
+#include <mutex>
 
 #include <google/protobuf/message.h>
 #include "rpc_packet.h"
@@ -23,11 +24,20 @@ class RpcStub
 {
 public:
 	RpcStub(boost::asio::io_service& io_service, tcp::socket socket)
-		: RpcSocket(io_service, std::move(socket))
+		: RpcSocket(io_service, std::move(socket)
+		, [this](boost::system::error_code)
+		{
+			std::lock_guard<std::mutex> lock(wait_reply_lock_);
+			std::unordered_map<size_t, ReplyCallbackF> empty;
+			wait_reply_queue_.swap(empty);
+		})
 	{}
 
 	virtual ~RpcStub()
-	{}
+	{
+		auto cnt = wait_reply_queue_.size();
+		cnt++;
+	}
 		
 protected:
 	template<typename ReplyMsgT>
@@ -39,6 +49,7 @@ private:
 	size_t RegisterReplyCallback(ReplyCallbackF&& cb)
 	{
 		auto uid = rpc_message_uid_.fetch_add(1);
+		std::lock_guard<std::mutex> lock(wait_reply_lock_);
 		wait_reply_queue_[uid] = cb;
 
 		return uid;
@@ -49,12 +60,20 @@ private:
 		auto rpc_msg_uid = msg.get_header().rpc_msg_uid_;
 		auto err_code = msg.get_header().error_code_;
 
+		wait_reply_lock_.lock();
 		auto it = wait_reply_queue_.find(rpc_msg_uid);
-		if (it != wait_reply_queue_.end())
+		if (it == wait_reply_queue_.end())
+		{
+			wait_reply_lock_.unlock();
+			return false;
+		}
+		else
 		{
 			auto callback = std::move(it->second);
-
 			wait_reply_queue_.erase(it);
+			
+			wait_reply_lock_.unlock();
+
 			callback(err_code, msg);
 		}
 
@@ -63,6 +82,8 @@ private:
 
 private:
 	std::atomic<size_t> rpc_message_uid_{ 0 };
+
+	std::mutex wait_reply_lock_;
 	std::unordered_map<size_t, ReplyCallbackF> wait_reply_queue_;
 };
 

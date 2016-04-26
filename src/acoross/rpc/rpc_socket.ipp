@@ -7,12 +7,26 @@ namespace rpc {
 
 inline void RpcSocket::send(std::shared_ptr<RpcPacket> new_msg)
 {
-	bool write_in_progress = !write_msgs_.empty();
-	write_msgs_.push_back(new_msg);
-	if (!write_in_progress)
+	if (started_.load() == false)
 	{
-		do_write();
+		_ASSERT(0);
+		return abort();
 	}
+
+	RpcSocket::pending_write().fetch_add(new_msg->length());
+	my_pending_write_.fetch_add(new_msg->length());
+	RpcSocket::pending_write_cnt().fetch_add(1);
+
+	write_strand_.post(
+		[this, new_msg]()
+	{
+		bool write_in_progress = !write_msgs_.empty();
+		write_msgs_.push_back(new_msg);
+		if (!write_in_progress)
+		{
+			do_write();
+		}
+	});
 }
 
 inline void RpcSocket::do_write()
@@ -21,19 +35,29 @@ inline void RpcSocket::do_write()
 	boost::asio::async_write(socket_,
 		boost::asio::buffer(write_msgs_.front()->data(),
 			write_msgs_.front()->length()),
-		[this, self](boost::system::error_code ec, std::size_t /*length*/)
+		[this, self](boost::system::error_code ec, std::size_t length)
 	{
 		if (!ec)
 		{
-			write_msgs_.pop_front();
-			if (!write_msgs_.empty())
+			write_strand_.post(
+				[this]()
 			{
-				do_write();
-			}
+				RpcSocket::pending_write().fetch_sub(write_msgs_.front()->length());
+				my_pending_write_.fetch_sub(write_msgs_.front()->length());
+				RpcSocket::pending_write_cnt().fetch_sub(1);
+
+				write_msgs_.pop_front();
+
+				if (!write_msgs_.empty())
+				{
+					do_write();
+				}
+
+			});
 		}
 		else
 		{
-			end();
+			end(ec);
 		}
 	});
 }
@@ -51,7 +75,7 @@ inline void RpcSocket::do_read_header()
 		}
 		else
 		{
-			end();
+			end(ec);
 		}
 	});
 }
@@ -69,7 +93,7 @@ inline void RpcSocket::do_read_body()
 		}
 		else
 		{
-			end();
+			end(ec);
 		}
 	});
 }
