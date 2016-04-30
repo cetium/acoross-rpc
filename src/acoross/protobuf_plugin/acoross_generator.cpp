@@ -126,6 +126,7 @@ grpc::string GetHeaderIncludes(const grpc::protobuf::FileDescriptor *file,
 	const Parameters &params)
 {
 	grpc::string temp =
+		"#include <SDKDDKVer.h>\n"
 		"#include <boost/asio.hpp>\n"
 		"#include <acoross/rpc/rpc_service.h>\n"
 		"#include <acoross/rpc/rpc_stub.h>\n"

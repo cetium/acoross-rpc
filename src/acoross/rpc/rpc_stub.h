@@ -1,6 +1,7 @@
 #ifndef ACOROSS_RPC_STUB_H_
 #define ACOROSS_RPC_STUB_H_
 
+#include <SDKDDKVer.h>
 #include <boost/asio.hpp>
 #include <memory>
 #include <unordered_map>
